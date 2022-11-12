@@ -5,24 +5,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class EzanRahmen extends JFrame {
 
+    private final HashMap<String, NamazVakti> hashMap = new LinkedHashMap<>();
+    private final NamazVakti[] namazVakti;
     private JPanel hauptPanel;
     private JComboBox<String> datumComboBox;
     private JLabel sabahLabel;
@@ -31,47 +28,25 @@ public class EzanRahmen extends JFrame {
     private JLabel aksamLabel;
     private JLabel yatsiLabel;
     private JLabel nochTimeLabel;
+    private JLabel clockLabel;
+    private String sabah, ogle, ikindi, aksam, yatsi;
 
     public EzanRahmen() throws HeadlessException {
 
-
-        HttpClient httpClient = HttpClient.newHttpClient();
-        HttpRequest httpRequests = HttpRequest.newBuilder()
-                                              .uri(URI.create("https://ezanvakti.herokuapp.com/vakitler/11005"))
-                                              .build();
+        uhrzeit();
 
         HttpResponse<String> httpResponse = null;
         try {
-            httpResponse = httpClient.send(httpRequests, HttpResponse.BodyHandlers.ofString());
+            httpResponse = httpInhalt();
         }
         catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        System.out.println("httpResponse.body() = " + httpResponse.body());
+        namazVakti = eintraege(httpResponse);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        NamazVakti[] namazVakti;
-        try {
-            namazVakti = objectMapper.readValue(httpResponse.body(), NamazVakti[].class);
-        }
-        catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        HashMap<String, NamazVakti> hashMap = new HashMap<>();
-        DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<>();
-
-        for (NamazVakti namazVakti1 : namazVakti) {
-
-            hashMap.put(namazVakti1.getDatum(), namazVakti1);
-            defaultComboBoxModel.addElement(namazVakti1.getDatum());
-            System.out.println("namazVakti1.toString() = " + namazVakti1.toString());
-        }
-
-        datumComboBox.setModel(defaultComboBoxModel);
-
+        comboElemente();
+        listeners();
 
         setContentPane(hauptPanel);
         pack();
@@ -80,51 +55,49 @@ public class EzanRahmen extends JFrame {
         setTitle("Bremen - Namaz Vakitleri");
         setVisible(true);
 
+        initScreen();
+    }
 
+    private void initScreen() {
+
+        String wert = hashMap.entrySet().iterator().next().getKey();
+        datumComboBox.getEditor().setItem(wert);
+
+        ogle = hashMap.get(wert).getOgle();
+        ikindi = hashMap.get(wert).getIkindi();
+        aksam = hashMap.get(wert).getAksam();
+        sabah = hashMap.get(wert).getGunes();
+        yatsi = hashMap.get(wert).getYatsi();
+
+        sabahLabel.setText(sabah);
+        ogleLabel.setText(ogle);
+        ikindiLabel.setText(ikindi);
+        aksamLabel.setText(aksam);
+        yatsiLabel.setText(yatsi);
+
+        aktuelleVakit();
+        //nochZeit();
+
+        setSize(getWidth() + 1, getHeight() + 1);
+        pack();
+    }
+
+    private void listeners() {
 
         datumComboBox.addActionListener(actionEvent -> {
+            backgroundNormal();
 
+            String wert = String.valueOf(datumComboBox.getEditor().getItem().toString());
 
-            String sabah = hashMap.get(datumComboBox.getEditor().getItem().toString()).getGunes();
-            String ogle = hashMap.get(datumComboBox.getEditor().getItem().toString()).getOgle();
-            String ikindi = hashMap.get(datumComboBox.getEditor().getItem().toString()).getIkindi();
-            String aksam = hashMap.get(datumComboBox.getEditor().getItem().toString()).getAksam();
-            String yatsi = hashMap.get(datumComboBox.getEditor().getItem().toString()).getYatsi();
+            sabah = hashMap.get(wert).getGunes();
+            ogle = hashMap.get(wert).getOgle();
+            ikindi = hashMap.get(wert).getIkindi();
+            aksam = hashMap.get(wert).getAksam();
+            yatsi = hashMap.get(wert).getYatsi();
 
-            System.out.println("LocalTime.parse(sabah) = " + LocalTime.parse(sabah));
+            aktuelleVakit();
 
-            System.out.println(LocalTime.now().compareTo(LocalTime.parse(sabah)));
-            System.out.println(LocalTime.now().compareTo(LocalTime.parse(ogle)));
-            System.out.println(LocalTime.now().compareTo(LocalTime.parse(ikindi)));
-
-            if (LocalTime.now().compareTo(LocalTime.parse(sabah)) < 0) {
-
-                sabahLabel.setBackground(new Color(0x930C191E, true));
-                nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(sabah), ChronoUnit.MINUTES)));
-
-            } else if (LocalTime.now().compareTo(LocalTime.parse(ogle)) < 0) {
-
-                ogleLabel.setBackground(new Color(0x930C191E, true));
-                nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(ogle), ChronoUnit.MINUTES)));
-
-            } else if (LocalTime.now().compareTo(LocalTime.parse(ikindi)) < 0) {
-
-                ikindiLabel.setBackground(new Color(0x930C191E, true));
-                nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(ikindi), ChronoUnit.MINUTES)));
-
-            } else if (LocalTime.now().compareTo(LocalTime.parse(aksam)) < 0) {
-
-                aksamLabel.setBackground(new Color(0x930C191E, true));
-                nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(aksam), ChronoUnit.MINUTES)));
-
-            } else if (LocalTime.now().compareTo(LocalTime.parse(yatsi)) < 0) {
-
-                yatsiLabel.setBackground(new Color(0x930C191E, true));
-                nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(yatsi), ChronoUnit.MINUTES)));
-            }
-
-            System.out.println("LocalTime.now().until(LocalTime.parse(ikindi), ChronoUnit.MINUTES) = " + LocalTime.now().until(LocalTime.parse(ikindi), ChronoUnit.MINUTES));
-
+            //nochZeit();
 
             sabahLabel.setText(sabah);
             ogleLabel.setText(ogle);
@@ -132,21 +105,94 @@ public class EzanRahmen extends JFrame {
             aksamLabel.setText(aksam);
             yatsiLabel.setText(yatsi);
 
-            int delay = 1000; //milliseconds
-            ActionListener taskPerformer = new ActionListener() {
-                public void actionPerformed(ActionEvent evt) {
-                    String date = new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(System.currentTimeMillis()));
-                    nochTimeLabel.setText(date);
-                }
-            };
-            new Timer(delay, taskPerformer).start();
-
-
-
-
-            setSize(getWidth()+1,getHeight()+1);
+            setSize(getWidth() + 1, getHeight() + 1);
             pack();
-
         });
+    }
+
+    private void nochZeit() {
+
+        nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(ikindi), ChronoUnit.MINUTES)));
+    }
+
+    private void aktuelleVakit() {
+
+        if (LocalTime.now().compareTo(LocalTime.parse(sabah)) < 0) {
+
+            sabahLabel.setBackground(new Color(0x930C191E, true));
+            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(sabah), ChronoUnit.MINUTES)));
+        } else if (LocalTime.now().compareTo(LocalTime.parse(ogle)) < 0) {
+
+            ogleLabel.setBackground(new Color(0x930C191E, true));
+            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(ogle), ChronoUnit.MINUTES)));
+        } else if (LocalTime.now().compareTo(LocalTime.parse(ikindi)) < 0) {
+
+            ikindiLabel.setBackground(new Color(0x930C191E, true));
+            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(ikindi), ChronoUnit.MINUTES)));
+        } else if (LocalTime.now().compareTo(LocalTime.parse(aksam)) < 0) {
+
+            aksamLabel.setBackground(new Color(0x930C191E, true));
+            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(aksam), ChronoUnit.MINUTES)));
+        } else if (LocalTime.now().compareTo(LocalTime.parse(yatsi)) < 0) {
+
+            yatsiLabel.setBackground(new Color(0x930C191E, true));
+            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(yatsi), ChronoUnit.MINUTES)));
+        } else {
+
+            nochTimeLabel.setText("Allah kabul etsin :D");
+        }
+    }
+
+    private void backgroundNormal() {
+
+        sabahLabel.setBackground(new Color(13487309, true));
+        ogleLabel.setBackground(new Color(13487309, true));
+        ikindiLabel.setBackground(new Color(13487309, true));
+        aksamLabel.setBackground(new Color(13487309, true));
+        yatsiLabel.setBackground(new Color(13487309, true));
+    }
+
+    private void comboElemente() {
+
+        DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<>();
+        for (NamazVakti gebetszeit : namazVakti) {
+
+            hashMap.put(gebetszeit.getDatum(), gebetszeit);
+            defaultComboBoxModel.addElement(gebetszeit.getDatum());
+        }
+
+        datumComboBox.setModel(defaultComboBoxModel);
+    }
+
+    private NamazVakti[] eintraege(HttpResponse<String> httpResponse) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            return objectMapper.readValue(httpResponse.body(), NamazVakti[].class);
+        }
+        catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void uhrzeit() {
+
+        int delay = 1000; //milliseconds
+        ActionListener taskPerformer = evt -> {
+            String date = new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(System.currentTimeMillis()));
+            clockLabel.setText(date);
+        };
+        new Timer(delay, taskPerformer).start();
+    }
+
+    private HttpResponse<String> httpInhalt() throws IOException, InterruptedException {
+
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest httpRequests = HttpRequest.newBuilder()
+                                              .uri(URI.create("https://ezanvakti.herokuapp.com/vakitler/11005"))
+                                              .build();
+
+        return httpClient.send(httpRequests, HttpResponse.BodyHandlers.ofString());
     }
 }
