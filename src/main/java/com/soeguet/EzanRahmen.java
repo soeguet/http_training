@@ -12,8 +12,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
 
 public class EzanRahmen extends JFrame {
 
@@ -54,15 +53,17 @@ public class EzanRahmen extends JFrame {
             throw new RuntimeException(e);
         }
 
-        Set<String> vaktiList = new HashSet<>();
+        HashMap<String, NamazVakti> hashMap = new HashMap<>();
+        DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<>();
+
         for (NamazVakti namazVakti1 : namazVakti) {
 
-            vaktiList.add(namazVakti1.getDatum());
+            hashMap.put(namazVakti1.getDatum(), namazVakti1);
+            defaultComboBoxModel.addElement(namazVakti1.getDatum());
             System.out.println("namazVakti1.toString() = " + namazVakti1.toString());
         }
 
-        datumComboBox.setModel(new DefaultComboBoxModel<String>(vaktiList.toArray(new String[0])));
-
+        datumComboBox.setModel(defaultComboBoxModel);
 
         datumComboBox.addActionListener(new ActionListener() {
 
@@ -70,7 +71,6 @@ public class EzanRahmen extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
 
                 System.out.println("ACTION!");
-                System.out.println("vaktiList.contains(datumComboBox.getEditor().getItem().toString()) = " + vaktiList.(datumComboBox.getEditor().getItem().toString()));;
 
             }
         });
