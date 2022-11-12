@@ -10,6 +10,8 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.formdev:flatlaf-intellij-themes:2.6'
+    implementation 'com.formdev:flatlaf:2.6'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.14.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.14.0'
