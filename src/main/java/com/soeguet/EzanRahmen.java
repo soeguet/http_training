@@ -2,6 +2,7 @@ package com.soeguet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javazoom.jl.player.advanced.AdvancedPlayer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,6 +31,9 @@ public class EzanRahmen extends JFrame {
     private JLabel nochTimeLabel;
     private JLabel clockLabel;
     private String sabah, ogle, ikindi, aksam, yatsi;
+    private Thread ezanThread;
+    private AdvancedPlayer player;
+    private Overlay overlay;
 
     public EzanRahmen() throws HeadlessException {
 
@@ -47,6 +51,7 @@ public class EzanRahmen extends JFrame {
 
         comboElemente();
         listeners();
+        initScreen();
 
         setContentPane(hauptPanel);
         pack();
@@ -54,8 +59,14 @@ public class EzanRahmen extends JFrame {
         setLocationRelativeTo(null);
         setTitle("Bremen - Namaz Vakitleri");
         setVisible(true);
+        setResizable(false);
 
-        initScreen();
+        playSoundEzan();
+    }
+
+    private void playSoundEzan() {
+
+        overlay = new Overlay();
     }
 
     private void initScreen() {
@@ -110,37 +121,60 @@ public class EzanRahmen extends JFrame {
         });
     }
 
-    private void nochZeit() {
+    private String verbleibendeZeit(String vakit) {
 
-        nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(ikindi), ChronoUnit.MINUTES)));
+        long until = LocalTime.now().until(LocalTime.parse(vakit), ChronoUnit.MINUTES);
+
+        if (until < 60) {
+            return String.valueOf(LocalTime.now().until(LocalTime.parse(vakit), ChronoUnit.MINUTES) + " Minuten");
+        } else {
+
+            if ((int) (LocalTime.now().until(LocalTime.parse(vakit), ChronoUnit.MINUTES) / 60) == 1) {
+
+            }
+            return String.valueOf((int) (LocalTime.now().until(LocalTime.parse(vakit), ChronoUnit.MINUTES) / 60) + " Stunden und "
+                                  + (int) (LocalTime.now().until(LocalTime.parse(vakit), ChronoUnit.MINUTES) % 60) + " Minuten");
+        }
     }
 
     private void aktuelleVakit() {
 
-        if (LocalTime.now().compareTo(LocalTime.parse(sabah)) < 0) {
+        int delay = 1_000; //milliseconds
 
-            sabahLabel.setBackground(new Color(0x930C191E, true));
-            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(sabah), ChronoUnit.MINUTES)));
-        } else if (LocalTime.now().compareTo(LocalTime.parse(ogle)) < 0) {
+        ActionListener taskPerformer = evt -> {
 
-            ogleLabel.setBackground(new Color(0x930C191E, true));
-            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(ogle), ChronoUnit.MINUTES)));
-        } else if (LocalTime.now().compareTo(LocalTime.parse(ikindi)) < 0) {
+            if (LocalTime.now().compareTo(LocalTime.parse(sabah)) < 0) {
 
-            ikindiLabel.setBackground(new Color(0x930C191E, true));
-            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(ikindi), ChronoUnit.MINUTES)));
-        } else if (LocalTime.now().compareTo(LocalTime.parse(aksam)) < 0) {
+                sabahLabel.setBackground(new Color(0x930C191E, true));
+                nochTimeLabel.setText(verbleibendeZeit(sabah));
+            } else if (LocalTime.now().compareTo(LocalTime.parse(ogle)) < 0) {
 
-            aksamLabel.setBackground(new Color(0x930C191E, true));
-            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(aksam), ChronoUnit.MINUTES)));
-        } else if (LocalTime.now().compareTo(LocalTime.parse(yatsi)) < 0) {
+                ogleLabel.setBackground(new Color(0x930C191E, true));
+                nochTimeLabel.setText(verbleibendeZeit(ogle));
+            } else if (LocalTime.now().compareTo(LocalTime.parse(ikindi)) < 0) {
 
-            yatsiLabel.setBackground(new Color(0x930C191E, true));
-            nochTimeLabel.setText(String.valueOf(LocalTime.now().until(LocalTime.parse(yatsi), ChronoUnit.MINUTES)));
-        } else {
+                ikindiLabel.setBackground(new Color(0x930C191E, true));
+                nochTimeLabel.setText(verbleibendeZeit(ikindi));
+            } else if (LocalTime.now().compareTo(LocalTime.parse(aksam)) < 0) {
 
-            nochTimeLabel.setText("Allah kabul etsin :D");
-        }
+                aksamLabel.setBackground(new Color(0x930C191E, true));
+                nochTimeLabel.setText(verbleibendeZeit(aksam));
+            } else if (LocalTime.now().compareTo(LocalTime.parse(yatsi)) < 0) {
+
+                yatsiLabel.setBackground(new Color(0x930C191E, true));
+                nochTimeLabel.setText(verbleibendeZeit(yatsi));
+            } else {
+
+                nochTimeLabel.setText("Allah kabul etsin :D");
+            }
+
+            if (LocalTime.now().getSecond() == 0) {
+
+                //playSoundEzan();
+            }
+        };
+
+        new Timer(delay, taskPerformer).start();
     }
 
     private void backgroundNormal() {
@@ -178,8 +212,9 @@ public class EzanRahmen extends JFrame {
 
     private void uhrzeit() {
 
-        int delay = 1000; //milliseconds
+        int delay = 500; //milliseconds
         ActionListener taskPerformer = evt -> {
+
             String date = new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(System.currentTimeMillis()));
             clockLabel.setText(date);
         };
