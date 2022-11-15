@@ -23,6 +23,13 @@
               </grid>
             </constraints>
             <properties>
+              <autoscrolls value="false"/>
+              <borderPainted value="true"/>
+              <focusable value="false"/>
+              <indeterminate value="false"/>
+              <opaque value="false"/>
+              <requestFocusEnabled value="false"/>
+              <string value="00:00 / 00:00"/>
               <stringPainted value="true"/>
             </properties>
           </component>

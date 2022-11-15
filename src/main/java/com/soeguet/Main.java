@@ -1,15 +1,30 @@
 package com.soeguet;
 
-import com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme;
 import com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme;
 
-public class Main {
+import javax.swing.*;
 
-    public static void main(String[] args) {
+public class Main extends JFrame {
+
+    public Main() {
+
+        System.out.println("Thread.currentThread() = " + Thread.currentThread());
+        System.out.println("Thread.State.RUNNABLE = " + Thread.State.RUNNABLE);
+
+        System.out.println("Thread.activeCount() = " + Thread.activeCount());
 
         FlatXcodeDarkIJTheme.setup();
 
-        new EzanRahmen();
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setTitle("Bremen - Namaz Vakitleri");
+        setResizable(false);
 
+        new EzanRahmen(this);
+    }
+
+    public static void main(String[] args) {
+
+        new Main();
     }
 }
