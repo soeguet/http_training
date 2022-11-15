@@ -1,7 +1,7 @@
 package com.soeguet;
 
-public record Mp3Files() {
+public class Mp3Files {
 
-    static String azanMedinah = "src/main/resources/mp3/azan1.mp3";
-    static String yusufIslam = "src/main/resources/mp3/Yusuf Islam.mp3";
+    static String AZANMEDINAH = "src/main/resources/mp3/azan1.mp3";
+    static String YUSUFISLAM = "src/main/resources/mp3/Yusuf Islam.mp3";
 }

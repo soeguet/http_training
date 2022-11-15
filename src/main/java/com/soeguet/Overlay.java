@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.soeguet.Mp3Files.yusufIslam;
+import static com.soeguet.Mp3Files.YUSUFISLAM;
 
 public class Overlay {
 
@@ -99,7 +99,7 @@ public class Overlay {
 
                 try {
 
-                    basicPlayer.open(new File(yusufIslam));
+                    basicPlayer.open(new File(YUSUFISLAM));
                     basicPlayer.play();
                     basicPlayer.setGain(0.85);
                 }
@@ -228,7 +228,7 @@ public class Overlay {
     private void mp3TotalTime() {
 
         try {
-            AudioFile audioFile = AudioFileIO.read(new File(yusufIslam));
+            AudioFile audioFile = AudioFileIO.read(new File(YUSUFISLAM));
             duration = audioFile.getAudioHeader().getTrackLength();
 
             System.out.println("duration = " + duration);
