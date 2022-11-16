@@ -15,8 +15,6 @@ public class Main extends JFrame {
 
         FlatXcodeDarkIJTheme.setup();
 
-
-
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setTitle("Bremen - Namaz Vakitleri");

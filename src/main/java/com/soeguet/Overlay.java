@@ -42,7 +42,6 @@ public class Overlay {
 
         System.out.println("Thread.currentThread() = " + Thread.currentThread());
         System.out.println("Thread.State.RUNNABLE = " + Thread.State.RUNNABLE);
-
         System.out.println("Thread.activeCount() = " + Thread.activeCount());
 
         //Max Zeit des geladenen MP3
@@ -167,7 +166,6 @@ public class Overlay {
 
                 timer.cancel();
                 timer.purge();
-
             }
 
             if (overlayThread != null) {
@@ -177,11 +175,7 @@ public class Overlay {
 
             System.out.println("Thread.currentThread() = " + Thread.currentThread());
             System.out.println("Thread.State.RUNNABLE = " + Thread.State.RUNNABLE);
-
             System.out.println("Thread.activeCount() = " + Thread.activeCount());
-
-
-
 
             if (ezanRahmen != null) {
 
@@ -196,12 +190,6 @@ public class Overlay {
     private void pausenButtonListener() {
 
         pauseButton.addActionListener(actionEvent -> {
-
-            System.out.println("pausenbutton");
-
-            System.out.println("neuer pausenthread!");
-
-            System.out.println("basicPlayer.getStatus() = " + basicPlayer.getStatus());
 
             if (basicPlayer.getStatus() == 0) {
 
@@ -220,8 +208,6 @@ public class Overlay {
                     throw new RuntimeException(e);
                 }
             }
-
-            System.out.println("basicPlayer.getStatus2() = " + basicPlayer.getStatus());
         });
     }
 
@@ -230,8 +216,6 @@ public class Overlay {
         try {
             AudioFile audioFile = AudioFileIO.read(new File(YUSUFISLAM));
             duration = audioFile.getAudioHeader().getTrackLength();
-
-            System.out.println("duration = " + duration);
         }
         catch (Exception e) {
             JOptionPane.showMessageDialog(null, "die angeforderte MP3 ist nicht auffindbar");
