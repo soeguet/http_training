@@ -271,7 +271,7 @@ public class EzanRahmen {
 
     private void uhrzeit() {
 
-        int delay = 500; //milliseconds
+        int delay = 1_000; //milliseconds
         ActionListener taskPerformer = evt -> {
 
             String date = new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(System.currentTimeMillis()));
@@ -310,8 +310,11 @@ public class EzanRahmen {
         buttonGroup.add(adthanMedinaRadioButton);
         buttonGroup.add(starWars3RadioButton);
 
-        jFrame.setJMenuBar(new JMenuBar());
-        jFrame.add(new JMenu("TEST1"));
+        if (jFrame != null) {
+
+            jFrame.setJMenuBar(new JMenuBar());
+            jFrame.add(new JMenu("TEST1"));
+        }
 
         yusufIslamRadioButton.addActionListener(actionEvent -> System.out.println("HEY"));
     }
